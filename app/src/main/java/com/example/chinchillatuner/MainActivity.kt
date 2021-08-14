@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,9 +44,11 @@ class MainActivity : ComponentActivity() {
 
         x.launch(android.Manifest.permission.RECORD_AUDIO)
 
-        audioViewModel.start()
+        Toast.makeText(this, "start", Toast.LENGTH_LONG).show()
 
         setContent {
+            LaunchedEffect(key1 = "1", block = { audioViewModel.start() })
+
             ChinchillaTunerTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {

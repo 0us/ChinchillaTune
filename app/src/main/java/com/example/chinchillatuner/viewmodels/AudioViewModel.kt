@@ -1,6 +1,7 @@
 package com.example.chinchillatuner.viewmodels
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.chinchillatuner.audio.AudioService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -11,6 +12,6 @@ class AudioViewModel @Inject constructor(
 ) : ViewModel() {
 
     fun start() {
-        service.start()
+        service.start(this.viewModelScope)
     }
 }
