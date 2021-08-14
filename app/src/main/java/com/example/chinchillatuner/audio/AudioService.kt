@@ -12,6 +12,7 @@ import androidx.core.app.ActivityCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -33,18 +34,17 @@ interface AudioService {
 class DefaultAudioService @Inject constructor(
     @ApplicationContext private val context: Context
 ) : AudioService {
-    private lateinit var audioRecord: AudioRecord
 
     override fun start() {
-        startRecording()
-        read()
+        val audioRecord = startRecording()
+        read(audioRecord)
     }
 
     fun stop() {
         throw CancellationException()
     }
 
-    private fun read() {
+    private fun read(audioRecord: AudioRecord) {
         val data =
             ByteArray(BUFFER_SIZE_RECORDING / 2) // assign size so that bytes are read in in chunks inferior to AudioRecord internal buffer size
 
@@ -65,7 +65,7 @@ class DefaultAudioService @Inject constructor(
 
     }
 
-    private fun startRecording() {
+    private fun startRecording(): AudioRecord {
         if (ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.RECORD_AUDIO
@@ -78,19 +78,21 @@ class DefaultAudioService @Inject constructor(
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-            return
+            throw IllegalArgumentException("No permission!")
         }
-        audioRecord = AudioRecord(
+        val audioRecord = AudioRecord(
             AUDIO_SOURCE,
             SAMPLE_RATE,
             CHANNEL_CONFIG,
             AUDIO_FORMAT,
             BUFFER_SIZE_RECORDING
         )
-        if (audioRecord!!.state != AudioRecord.STATE_INITIALIZED) { // check for proper initialization
-            return
-        }
-        audioRecord!!.startRecording()
-    }
 
+        if (audioRecord.state != AudioRecord.STATE_INITIALIZED) { // check for proper initialization
+            throw IllegalArgumentException("NOOOO!")
+        }
+        audioRecord.startRecording()
+
+        return audioRecord
+    }
 }

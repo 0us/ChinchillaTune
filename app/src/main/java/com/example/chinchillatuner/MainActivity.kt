@@ -3,8 +3,10 @@ package com.example.chinchillatuner
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
@@ -33,6 +35,13 @@ class MainActivity : ComponentActivity() {
             "New standard",
             "Drop D"
         )
+
+
+        val x = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            Toast.makeText(this, "ja", Toast.LENGTH_LONG).show()
+        }
+
+        x.launch(android.Manifest.permission.RECORD_AUDIO)
 
         audioViewModel.start()
 
