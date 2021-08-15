@@ -6,8 +6,11 @@ import android.media.AudioRecord
 import android.media.MediaRecorder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -33,7 +36,7 @@ val BUFFER_SIZE_RECORDING =
 private const val LOG_TAG = "AudioRecordTest"
 
 interface AudioService {
-    fun record(): Flow<ByteArray>
+    fun record(): ReceiveChannel<ByteArray>
 }
 
 class DefaultAudioService @Inject constructor() : AudioService, CoroutineScope {
@@ -50,14 +53,14 @@ class DefaultAudioService @Inject constructor() : AudioService, CoroutineScope {
         BUFFER_SIZE_RECORDING
     )
 
-    override fun record(): Flow<ByteArray> {
+    override fun record(): ReceiveChannel<ByteArray> {
         recorder.startRecording()
 
-        return flow {
+        return produce {
             val buffer = ByteBuffer.allocateDirect(BUFFER_SIZE_RECORDING)
             while (true) {
                 recorder.read(buffer, BUFFER_SIZE_RECORDING)
-                emit(buffer.array().clone())
+                send(buffer.array().clone())
                 buffer.clear()
             }
         }

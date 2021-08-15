@@ -14,9 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import com.example.base.audio.tuning.NoteConfig
 import com.example.base.audio.tuning.TuningConfig
 
 @Composable
@@ -36,7 +36,7 @@ fun Tuner(tuningConfig: TuningConfig, hertz: Double = 300.0) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 tuningConfig.notes.forEach {
-                    Note(it.name)
+                    Note(it, hertz)
                 }
             }
         }
@@ -58,15 +58,18 @@ fun TunerArrow(hertz: Double) {
 }
 
 @Composable
-fun Note(note: String = "E") {
+fun Note(note: NoteConfig, hertz: Double) {
+    val color = if (hertz.coerceIn(note.hertz - 50..note.hertz + 50) == hertz) {
+        Color.Green
+    } else Color.LightGray
     Box(
         modifier = Modifier
             .padding(horizontal = 8.dp)
             .clip(CircleShape)
-            .background(Color.Cyan)
+            .background(color)
     ) {
         Text(
-            text = note,
+            text = note.name,
             fontSize = 12.em,
             fontWeight = FontWeight(600),
             color = Color.White,
