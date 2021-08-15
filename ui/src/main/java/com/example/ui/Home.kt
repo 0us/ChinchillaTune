@@ -32,13 +32,8 @@ fun Home(audioVm: AudioViewModel = viewModel()) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            var selectedTuning by remember {
-                mutableStateOf(tunings.first())
-            }
-
-            var hertz by remember {
-                mutableStateOf(0.0)
-            }
+            var selectedTuning by remember { mutableStateOf(tunings.first()) }
+            var hertz by remember { mutableStateOf(0.0) }
 
             LaunchedEffect(true) {
                 launch(Dispatchers.IO) { audioVm.record().collect { newHertz -> hertz = newHertz } }
@@ -48,7 +43,7 @@ fun Home(audioVm: AudioViewModel = viewModel()) {
                 selectedTuning = it
             }
 
-            HertzContainer()
+            Hertz(hertz)
             Tuner(selectedTuning, hertz)
         }
     }

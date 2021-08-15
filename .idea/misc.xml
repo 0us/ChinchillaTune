@@ -3,7 +3,15 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/larso/AndroidStudioProjects/ChinchillaTuner/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.2140625" />
+        <entry key="..\:/Users/larso/AndroidStudioProjects/ChinchillaTuner/app/src/main/res/drawable/chinchilla_background.xml" value="0.2140625" />
+        <entry key="..\:/Users/larso/AndroidStudioProjects/ChinchillaTuner/app/src/main/res/drawable/ic_baseline_arrow_drop_down_24.xml" value="0.2140625" />
         <entry key="..\:/Users/larso/AndroidStudioProjects/ChinchillaTuner/app/src/main/res/drawable/ic_launcher_background.xml" value="0.2140625" />
+        <entry key="..\:/Users/larso/AndroidStudioProjects/ChinchillaTuner/app/src/main/res/drawable/ic_source_svg_file.xml" value="0.25" />
+        <entry key="..\:/Users/larso/AndroidStudioProjects/ChinchillaTuner/app/src/main/res/mipmap-anydpi-v26/chinchilla.xml" value="0.2140625" />
+        <entry key="..\:/Users/larso/AndroidStudioProjects/ChinchillaTuner/app/src/main/res/mipmap-anydpi-v26/chinchilla_round.xml" value="0.2140625" />
+        <entry key="..\:/Users/larso/AndroidStudioProjects/ChinchillaTuner/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2140625" />
+        <entry key="..\:/Users/larso/AndroidStudioProjects/ChinchillaTuner/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.2140625" />
       </map>
     </option>
   </component>
