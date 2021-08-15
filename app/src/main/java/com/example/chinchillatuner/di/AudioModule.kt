@@ -1,8 +1,7 @@
 package com.example.chinchillatuner.di
 
-import android.content.Context
-import com.example.chinchillatuner.audio.AudioService
-import com.example.chinchillatuner.audio.DefaultAudioService
+import com.example.base.audio.AudioService
+import com.example.base.audio.DefaultAudioService
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

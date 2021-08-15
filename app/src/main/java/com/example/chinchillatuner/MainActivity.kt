@@ -1,86 +1,60 @@
 package com.example.chinchillatuner
 
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.chinchillatuner.ui.theme.ChinchillaTunerTheme
-import com.example.chinchillatuner.viewmodels.AudioViewModel
+import com.example.ui.HertzContainer
+import com.example.ui.Tuner
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    private val audioViewModel: AudioViewModel by viewModels()
-
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val fakeTunings = setOf(
-            "Standard",
-            "New standard",
-            "Drop D"
-        )
-
-
-        val x = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-            Toast.makeText(this, "ja", Toast.LENGTH_LONG).show()
-        }
-
+        val x = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
         x.launch(android.Manifest.permission.RECORD_AUDIO)
 
         Toast.makeText(this, "start", Toast.LENGTH_LONG).show()
 
         setContent {
-            LaunchedEffect(key1 = "1", block = { audioViewModel.start() })
-
             ChinchillaTunerTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colors.background) {
-                    Greeting("Android")
 
-                    Box(
+                Surface(color = MaterialTheme.colors.background) {
+                    Column(
                         modifier = Modifier
-                            .fillMaxHeight()
                             .fillMaxWidth()
+                            .fillMaxHeight(),
                     ) {
-                        TuningDropdown(tunings = fakeTunings) {}
+                        DontBlockPlz {}
+                        Column(verticalArrangement = Arrangement.Bottom) {
+                            HertzContainer()
+                            Tuner()
+                        }
                     }
                 }
             }
         }
     }
+}
 
-    private var permissionToRecordAccepted = false
-    private val REQUEST_RECORD_AUDIO_PERMISSION = 200
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        permissionToRecordAccepted = if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
-            grantResults[0] == PackageManager.PERMISSION_GRANTED
-        } else {
-            false
-        }
-        if (!permissionToRecordAccepted) finish()
+@Composable
+fun DontBlockPlz(onClick: () -> Unit) {
+    var i by remember { mutableStateOf(0) }
+    Button(onClick = { i++ }) {
+        Text(i.toString())
     }
 }
 
@@ -102,7 +76,6 @@ fun Greeting(name: String) {
     Text(text = "Hello $name!")
 }
 
-@Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     ChinchillaTunerTheme {

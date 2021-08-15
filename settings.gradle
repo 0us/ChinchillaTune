@@ -7,3 +7,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "ChinchillaTuner"
 include ':app'
+include ':ui'
+include ':base'
