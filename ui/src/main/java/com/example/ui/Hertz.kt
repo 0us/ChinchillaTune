@@ -22,19 +22,12 @@ import java.math.RoundingMode
 
 @Composable
 fun HertzContainer(viewModel: AudioViewModel = viewModel()) {
-    var state by remember {
-        mutableStateOf(0.0)
-    }
-    LaunchedEffect(true) {
-        launch(Dispatchers.IO) { viewModel.record().collect { hertz -> state = hertz } }
-    }
-
-    Hertz(state)
+    Hertz(0.0)
 }
 
 @Preview
 @Composable
-fun Hertz(state: Double = 1243.0, oldState: Double = 4567.0) {
+fun Hertz(state: Double = 1243.0) {
     Row(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
