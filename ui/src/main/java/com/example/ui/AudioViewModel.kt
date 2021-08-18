@@ -3,10 +3,14 @@ package com.example.ui
 import androidx.lifecycle.ViewModel
 import com.example.base.audio.AudioCalculator
 import com.example.base.audio.AudioService
+import com.example.base.audio.PitchService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
+
 
 @HiltViewModel
 class AudioViewModel @Inject constructor(
@@ -15,13 +19,15 @@ class AudioViewModel @Inject constructor(
 
     private val calc = AudioCalculator()
 
-    private val samples = mutableListOf<Double>()
-    private val sampleSize = 1
+    val pitch = PitchService()
 
-    fun record(): Flow<Double> = flow {
-        for (item in service.record()) {
-            calc.setBytes(item)
-            emit(calc.frequency)
+    suspend fun record(): Flow<Double> = flow {
+        service.record().consumeAsFlow().collect {
+            val pitch = pitch.getPitch(it)
+            println(pitch)
+            if (pitch != -1.0) {
+                emit(pitch)
+            }
         }
     }
 }

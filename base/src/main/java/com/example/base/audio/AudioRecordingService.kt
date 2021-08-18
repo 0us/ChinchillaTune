@@ -6,12 +6,8 @@ import android.media.AudioRecord
 import android.media.MediaRecorder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
-import java.nio.ByteBuffer
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.produce
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -39,28 +35,29 @@ interface AudioService {
     fun record(): ReceiveChannel<ByteArray>
 }
 
+@SuppressLint("MissingPermission")
 class DefaultAudioService @Inject constructor() : AudioService, CoroutineScope {
 
     override val coroutineContext: CoroutineContext
         get() = Job()
 
-    @SuppressLint("MissingPermission")
-    private val recorder: AudioRecord = AudioRecord(
-        AUDIO_SOURCE,
-        SAMPLE_RATE,
-        CHANNEL_CONFIG,
-        AUDIO_FORMAT,
-        BUFFER_SIZE_RECORDING
-    )
+    private val recorder: AudioRecord =
+        AudioRecord(
+            AUDIO_SOURCE,
+            SAMPLE_RATE,
+            CHANNEL_CONFIG,
+            AUDIO_FORMAT,
+            BUFFER_SIZE_RECORDING
+        )
 
-    override fun record(): ReceiveChannel<ByteArray> {
+    override fun record(): ReceiveChannel<FloatArray> {
         recorder.startRecording()
-
         return produce {
-            val buffer = ByteBuffer.allocateDirect(BUFFER_SIZE_RECORDING)
+            val buffer = FloatArray(BUFFER_SIZE_RECORDING)
             while (true) {
+                recorder.read(buffer, 0f, 0f, BUFFER_SIZE_RECORDING)
                 recorder.read(buffer, BUFFER_SIZE_RECORDING)
-                send(buffer.array().clone())
+                send(buffer.copyOf())
                 buffer.clear()
             }
         }

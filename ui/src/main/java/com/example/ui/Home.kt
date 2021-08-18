@@ -1,18 +1,13 @@
 package com.example.ui
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,52 +26,61 @@ fun Home(audioVm: AudioViewModel = viewModel()) {
             .fillMaxWidth()
             .fillMaxHeight(),
     ) {
-        Column(
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        val state = remember {
+            TunerState()
+        }
 
-            val state = remember {
-                TunerState()
+        LaunchedEffect(Unit) {
+            launch(Dispatchers.IO) {
+                audioVm.record().collect { newHertz -> state.currentHz = newHertz }
             }
+        }
 
-            LaunchedEffect(Unit) {
-                launch(Dispatchers.IO) {
-                    audioVm.record().collect { newHertz -> state.currentHz = newHertz }
+        ChichillaBox(1f) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 30.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Weighted {
+                    HzDisplay(state.currentHz)
                 }
-            }
-            ChichillaBox(1f) {
-                Row(
-                    Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    HzDisplay(state)
-                    TuningDropdown { state.notes = it }
+                key(state.notes) {
+                    Weighted {
+                        TuningDropdown { state.notes = it }
+                    }
+                }
+                Weighted {
                     Box {}
                 }
             }
-            ChichillaBox(2f) {
-                BigNote(state)
-                Text(text = "123123")
-            }
-            ChichillaBox(1f) {
-                HzSlider(state = state)
-                Notes(state = state)
-            }
+        }
+        ChichillaBox(2f) {
+            BigNote(state)
+        }
+        ChichillaBox(1f) {
+            Box(modifier = Modifier.padding(horizontal = 30.dp)) {
+                HzSlider(state.hzToPercent().toFloat())
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFE0EA))
-                    .clip(CircleShape)
-            )
+                key(state.notes) {
+                    Notes(state = state)
+                }
+            }
         }
     }
 }
 
 @Composable
-fun HzSlider(state: TunerState) {
-    val sliderPos = animateFloatAsState(targetValue = state.hzToPercent().toFloat())
-    Slider(sliderPos.value, onValueChange = {})
+inline fun RowScope.Weighted(content: @Composable () -> Unit) {
+    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+        content()
+    }
+}
+
+@Composable
+fun HzSlider(position: Float) {
+    Slider(position, onValueChange = {})
 }
 
 
@@ -101,10 +105,7 @@ inline fun TuningDropdown(
         mutableStateOf(tunings.first().name)
     }
 
-    Box(
-        Modifier
-            .padding(vertical = 16.dp)
-            .clickable { expanded = true }) {
+    Box(Modifier.clickable { expanded = true }) {
         Row {
             Text(text = text)
             Icon(imageVector = Icons.Default.ArrowDropDown, "")
@@ -131,15 +132,14 @@ inline fun TuningDropdown(
 
 @Composable
 fun Notes(state: TunerState) {
-    key(state.notes) {
-        BoxWithConstraints(Modifier.fillMaxWidth()) {
-            with(LocalDensity.current) {
-                state.notes.notes.forEach {
-                    val pos = state.hzToPercent(it.hertz).toFloat()
-                    Box(Modifier.offset(x = (constraints.maxWidth.toDp() * pos))) {
-                        Text(text = it.name)
-                    }
-                }
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val width = with(LocalDensity.current) {
+            constraints.maxWidth.toDp()
+        }
+        state.notes.notes.forEach {
+            val pos = state.hzToPercent(it.hertz).toFloat()
+            Box(Modifier.offset(x = (width * pos))) {
+                Text(text = it.name)
             }
         }
     }
