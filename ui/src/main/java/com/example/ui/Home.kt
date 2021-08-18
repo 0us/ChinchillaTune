@@ -1,17 +1,16 @@
 package com.example.ui
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.base.audio.tuning.TuningConfig
@@ -19,6 +18,8 @@ import com.example.base.audio.tuning.tunings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlin.math.ln
+import kotlin.math.pow
 
 @Composable
 fun Home(audioVm: AudioViewModel = viewModel()) {
@@ -32,27 +33,53 @@ fun Home(audioVm: AudioViewModel = viewModel()) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            var selectedTuning by remember { mutableStateOf(tunings.first()) }
-            var hertz by remember { mutableStateOf(0.0) }
-
-            LaunchedEffect(true) {
-                launch(Dispatchers.IO) { audioVm.record().collect { newHertz -> hertz = newHertz } }
+            val state = remember {
+                TunerState()
             }
 
-            TuningDropdown(tunings = tunings) {
-                selectedTuning = it
+            LaunchedEffect(Unit) {
+                launch(Dispatchers.IO) {
+                    audioVm.record().collect { newHertz -> state.currentHz = newHertz }
+                }
             }
 
-            Hertz(hertz)
-            Tuner(selectedTuning, hertz)
+            ChichillaRow(1f) {
+                HzDisplay(state)
+                TuningDropdown { state.notes = it }
+                Box {}
+            }
+            ChichillaRow(2f) {
+                BigNote(state)
+            }
+            ChichillaRow(1f) {
+                HzSlider(state = state)
+//                Notes(state = state)
+            }
         }
     }
 }
 
 @Composable
-@Preview
+fun HzSlider(state: TunerState) {
+    val sliderPos = animateFloatAsState(targetValue = state.hzToPercent().toFloat())
+    Slider(sliderPos.value, onValueChange = {})
+}
+
+
+@Composable
+fun ColumnScope.ChichillaRow(weight: Float, content: @Composable () -> Unit) {
+    Row(
+        Modifier
+            .weight(weight)
+            .fillMaxWidth()
+    ) {
+        content()
+    }
+}
+
+
+@Composable
 fun TuningDropdown(
-    tunings: Set<TuningConfig> = com.example.base.audio.tuning.tunings,
     onSelected: (TuningConfig) -> Unit = {}
 ) {
     var expanded: Boolean by remember { mutableStateOf(false) }
@@ -62,7 +89,7 @@ fun TuningDropdown(
 
     Box(
         Modifier
-            .padding(24.dp)
+            .padding(12.dp)
             .clickable { expanded = true }) {
         Row {
             Text(text = text)
@@ -78,7 +105,7 @@ fun TuningDropdown(
                         onSelected(tuning)
                     }) {
                         Text(
-                            modifier = Modifier.padding(16.dp),
+                            modifier = Modifier.padding(8.dp),
                             text = tuning.name
                         )
                     }
@@ -86,4 +113,49 @@ fun TuningDropdown(
             }
         }
     }
+}
+
+@Composable
+fun Notes(state: TunerState) {
+    var size by remember { mutableStateOf(IntSize.Zero) }
+
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .onSizeChanged {
+                size = it
+            }
+    ) {
+        state.notes.notes.forEach {
+            val pos = state.hzToPercent()
+            Box(Modifier.offset(x = (pos * size.width).dp)) {
+                Text(text = it.name)
+            }
+        }
+    }
+}
+
+class TunerState {
+
+    var notes by mutableStateOf(tunings.first())
+
+    var min = notes.notes.first().hertz.plusHalfSteps(-1)
+        private set
+    var max = notes.notes.last().hertz.plusHalfSteps(1)
+        private set
+
+    var currentHz by mutableStateOf(0.0)
+
+    /**
+     * Add x amount of halfSteps to [this]
+     *
+     * @param this a double representing a frequency on a logarithmic scale
+     * @param halfSteps the amount of halfsteps to add
+     */
+    private fun Double.plusHalfSteps(halfSteps: Int): Double {
+        return this * 2.0.pow(halfSteps / 12.0)
+    }
+
+    fun hzToPercent() = (ln(currentHz / min)) / (ln(max / min))
+    fun percentToHz(x: Double) = max.pow(x) * min.pow(-x + 1)
 }
