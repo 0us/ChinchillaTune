@@ -1,6 +1,6 @@
 package com.example.base.audio.tuning
 
-val tunings = setOf(
+val tunings = arrayOf(
     TuningConfig(
         "Standard",
         arrayOf(

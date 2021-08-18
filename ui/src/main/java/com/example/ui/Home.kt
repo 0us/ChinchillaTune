@@ -1,16 +1,19 @@
 package com.example.ui
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.base.audio.tuning.TuningConfig
@@ -42,19 +45,30 @@ fun Home(audioVm: AudioViewModel = viewModel()) {
                     audioVm.record().collect { newHertz -> state.currentHz = newHertz }
                 }
             }
-
-            ChichillaRow(1f) {
-                HzDisplay(state)
-                TuningDropdown { state.notes = it }
-                Box {}
+            ChichillaBox(1f) {
+                Row(
+                    Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    HzDisplay(state)
+                    TuningDropdown { state.notes = it }
+                    Box {}
+                }
             }
-            ChichillaRow(2f) {
+            ChichillaBox(2f) {
                 BigNote(state)
+                Text(text = "123123")
             }
-            ChichillaRow(1f) {
+            ChichillaBox(1f) {
                 HzSlider(state = state)
-//                Notes(state = state)
+                Notes(state = state)
             }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFE0EA))
+                    .clip(CircleShape)
+            )
         }
     }
 }
@@ -67,11 +81,11 @@ fun HzSlider(state: TunerState) {
 
 
 @Composable
-fun ColumnScope.ChichillaRow(weight: Float, content: @Composable () -> Unit) {
-    Row(
+inline fun ColumnScope.ChichillaBox(weight: Float, content: @Composable () -> Unit) {
+    Box(
         Modifier
             .weight(weight)
-            .fillMaxWidth()
+            .fillMaxWidth(),
     ) {
         content()
     }
@@ -79,8 +93,8 @@ fun ColumnScope.ChichillaRow(weight: Float, content: @Composable () -> Unit) {
 
 
 @Composable
-fun TuningDropdown(
-    onSelected: (TuningConfig) -> Unit = {}
+inline fun TuningDropdown(
+    crossinline onSelected: (TuningConfig) -> Unit = {}
 ) {
     var expanded: Boolean by remember { mutableStateOf(false) }
     var text: String by remember {
@@ -89,7 +103,7 @@ fun TuningDropdown(
 
     Box(
         Modifier
-            .padding(12.dp)
+            .padding(vertical = 16.dp)
             .clickable { expanded = true }) {
         Row {
             Text(text = text)
@@ -117,19 +131,15 @@ fun TuningDropdown(
 
 @Composable
 fun Notes(state: TunerState) {
-    var size by remember { mutableStateOf(IntSize.Zero) }
-
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .onSizeChanged {
-                size = it
-            }
-    ) {
-        state.notes.notes.forEach {
-            val pos = state.hzToPercent()
-            Box(Modifier.offset(x = (pos * size.width).dp)) {
-                Text(text = it.name)
+    key(state.notes) {
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            with(LocalDensity.current) {
+                state.notes.notes.forEach {
+                    val pos = state.hzToPercent(it.hertz).toFloat()
+                    Box(Modifier.offset(x = (constraints.maxWidth.toDp() * pos))) {
+                        Text(text = it.name)
+                    }
+                }
             }
         }
     }
@@ -157,5 +167,6 @@ class TunerState {
     }
 
     fun hzToPercent() = (ln(currentHz / min)) / (ln(max / min))
+    fun hzToPercent(hz: Double) = (ln(hz / min)) / (ln(max / min))
     fun percentToHz(x: Double) = max.pow(x) * min.pow(-x + 1)
 }
