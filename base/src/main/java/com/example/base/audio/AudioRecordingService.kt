@@ -17,7 +17,7 @@ const val AUDIO_SOURCE =
 
 const val SAMPLE_RATE = 44100
 const val CHANNEL_CONFIG: Int = AudioFormat.CHANNEL_IN_MONO
-const val AUDIO_FORMAT: Int = AudioFormat.ENCODING_PCM_16BIT
+const val AUDIO_FORMAT: Int = AudioFormat.ENCODING_PCM_FLOAT
 
 /**
  * Factor by that the minimum buffer size is multiplied. The bigger the factor is the less
@@ -29,10 +29,8 @@ private const val BUFFER_SIZE_FACTOR = 2
 val BUFFER_SIZE_RECORDING =
     AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT) * BUFFER_SIZE_FACTOR
 
-private const val LOG_TAG = "AudioRecordTest"
-
 interface AudioService {
-    fun record(): ReceiveChannel<ByteArray>
+    fun record(): ReceiveChannel<FloatArray>
 }
 
 @SuppressLint("MissingPermission")
@@ -55,10 +53,8 @@ class DefaultAudioService @Inject constructor() : AudioService, CoroutineScope {
         return produce {
             val buffer = FloatArray(BUFFER_SIZE_RECORDING)
             while (true) {
-                recorder.read(buffer, 0f, 0f, BUFFER_SIZE_RECORDING)
-                recorder.read(buffer, BUFFER_SIZE_RECORDING)
+                recorder.read(buffer, 0, BUFFER_SIZE_RECORDING, AudioRecord.READ_BLOCKING)
                 send(buffer.copyOf())
-                buffer.clear()
             }
         }
     }

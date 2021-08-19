@@ -33,7 +33,17 @@ val tunings = arrayOf(
             NoteConfig("B", 246.9),
             NoteConfig("E", 329.6)
         )
-    )
+    ),
+    TuningConfig(
+        "Turbo",
+        arrayOf(
+            NoteConfig("T", 73.5),
+            NoteConfig("U", 110.0),
+            NoteConfig("R", 146.0),
+            NoteConfig("B", 196.0),
+            NoteConfig("O", 329.0),
+        )
+    ),
 )
 
 data class TuningConfig(
@@ -41,7 +51,7 @@ data class TuningConfig(
     val notes: Array<NoteConfig>
 ) {
     init {
-        if (notes.size != 6) throw IllegalArgumentException("Incorrect Tuning config: only 6 notes supported")
+//        if (notes.size != 6) throw IllegalArgumentException("Incorrect Tuning config: only 6 notes supported")
     }
 
     override fun equals(other: Any?): Boolean {

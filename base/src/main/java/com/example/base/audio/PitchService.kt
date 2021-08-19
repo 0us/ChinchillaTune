@@ -9,8 +9,8 @@ class PitchService {
     val wavelet = DynamicWavelet(SAMPLE_RATE.toFloat(), BUFFER_SIZE_RECORDING)
     val fastYin = FastYin(SAMPLE_RATE.toFloat(), BUFFER_SIZE_RECORDING)
 
-    fun getPitch(buffer: ByteArray): Double {
-        return fastYin.getPitch(floatMe(buffer)).pitch.toDouble()
+    fun getPitch(buffer: FloatArray): Double {
+        return fastYin.getPitch(buffer).pitch.toDouble()
     }
 }
 

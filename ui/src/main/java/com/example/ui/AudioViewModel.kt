@@ -17,14 +17,11 @@ class AudioViewModel @Inject constructor(
     private val service: AudioService
 ) : ViewModel() {
 
-    private val calc = AudioCalculator()
-
     val pitch = PitchService()
 
     suspend fun record(): Flow<Double> = flow {
         service.record().consumeAsFlow().collect {
             val pitch = pitch.getPitch(it)
-            println(pitch)
             if (pitch != -1.0) {
                 emit(pitch)
             }

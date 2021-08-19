@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.base.audio.tuning.TuningConfig
@@ -46,11 +45,9 @@ fun Home(audioVm: AudioViewModel = viewModel()) {
                 Weighted {
                     HzDisplay(state.currentHz)
                 }
-                key(state.notes) {
                     Weighted {
                         TuningDropdown { state.notes = it }
                     }
-                }
                 Weighted {
                     Box {}
                 }
@@ -60,12 +57,11 @@ fun Home(audioVm: AudioViewModel = viewModel()) {
             BigNote(state)
         }
         ChichillaBox(1f) {
-            Box(modifier = Modifier.padding(horizontal = 30.dp)) {
-                HzSlider(state.hzToPercent().toFloat())
-
+            Column(modifier = Modifier.padding(horizontal = 45.dp)) {
                 key(state.notes) {
-                    Notes(state = state)
+                    Notes(state)
                 }
+                HzSlider(state, 45.dp)
             }
         }
     }
@@ -77,12 +73,6 @@ inline fun RowScope.Weighted(content: @Composable () -> Unit) {
         content()
     }
 }
-
-@Composable
-fun HzSlider(position: Float) {
-    Slider(position, onValueChange = {})
-}
-
 
 @Composable
 inline fun ColumnScope.ChichillaBox(weight: Float, content: @Composable () -> Unit) {
@@ -130,28 +120,16 @@ inline fun TuningDropdown(
     }
 }
 
-@Composable
-fun Notes(state: TunerState) {
-    BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val width = with(LocalDensity.current) {
-            constraints.maxWidth.toDp()
-        }
-        state.notes.notes.forEach {
-            val pos = state.hzToPercent(it.hertz).toFloat()
-            Box(Modifier.offset(x = (width * pos))) {
-                Text(text = it.name)
-            }
-        }
-    }
-}
-
 class TunerState {
 
     var notes by mutableStateOf(tunings.first())
 
-    var min = notes.notes.first().hertz.plusHalfSteps(-1)
+    //    var min = notes.notes.first().hertz.plusHalfSteps(-1)
+    var min = notes.notes.first().hertz
         private set
-    var max = notes.notes.last().hertz.plusHalfSteps(1)
+
+    //    var max = notes.notes.last().hertz.plusHalfSteps(1)
+    var max = notes.notes.last().hertz
         private set
 
     var currentHz by mutableStateOf(0.0)
@@ -162,11 +140,12 @@ class TunerState {
      * @param this a double representing a frequency on a logarithmic scale
      * @param halfSteps the amount of halfsteps to add
      */
-    private fun Double.plusHalfSteps(halfSteps: Int): Double {
-        return this * 2.0.pow(halfSteps / 12.0)
-    }
 
     fun hzToPercent() = (ln(currentHz / min)) / (ln(max / min))
     fun hzToPercent(hz: Double) = (ln(hz / min)) / (ln(max / min))
     fun percentToHz(x: Double) = max.pow(x) * min.pow(-x + 1)
+}
+
+fun Double.plusHalfSteps(halfSteps: Int): Double {
+    return this * 2.0.pow(halfSteps / 12.0)
 }
