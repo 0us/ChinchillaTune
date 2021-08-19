@@ -14,6 +14,7 @@ import com.example.base.audio.tuning.TuningConfig
 import com.example.base.audio.tuning.tunings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import kotlin.math.ln
 import kotlin.math.pow
@@ -31,7 +32,7 @@ fun Home(audioVm: AudioViewModel = viewModel()) {
 
         LaunchedEffect(Unit) {
             launch(Dispatchers.IO) {
-                audioVm.record().collect { newHertz -> state.currentHz = newHertz }
+                audioVm.record().consumeAsFlow().collect { newHertz -> state.currentHz = newHertz }
             }
         }
 
@@ -45,9 +46,9 @@ fun Home(audioVm: AudioViewModel = viewModel()) {
                 Weighted {
                     HzDisplay(state.currentHz)
                 }
-                    Weighted {
-                        TuningDropdown { state.notes = it }
-                    }
+                Weighted {
+                    TuningDropdown { state.notes = it }
+                }
                 Weighted {
                     Box {}
                 }
