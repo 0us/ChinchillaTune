@@ -5,9 +5,11 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -36,25 +38,40 @@ interface AudioService {
 @SuppressLint("MissingPermission")
 class DefaultAudioService @Inject constructor() : AudioService, CoroutineScope {
 
+    private lateinit var recorder: AudioRecord
+    private lateinit var buffer: FloatArray
+
     override val coroutineContext: CoroutineContext
         get() = Job()
 
-    private val recorder: AudioRecord =
-        AudioRecord(
-            AUDIO_SOURCE,
-            SAMPLE_RATE,
-            CHANNEL_CONFIG,
-            AUDIO_FORMAT,
-            BUFFER_SIZE_RECORDING
-        )
-
     override fun record(): ReceiveChannel<FloatArray> {
-        recorder.startRecording()
-        return produce {
-            val buffer = FloatArray(BUFFER_SIZE_RECORDING)
-            while (true) {
-                recorder.read(buffer, 0, BUFFER_SIZE_RECORDING, AudioRecord.READ_BLOCKING)
-                send(buffer.copyOf())
+        return produce(coroutineContext + Dispatchers.IO) {
+
+            recorder = AudioRecord(
+                AUDIO_SOURCE,
+                SAMPLE_RATE,
+                CHANNEL_CONFIG,
+                AUDIO_FORMAT,
+                BUFFER_SIZE_RECORDING
+            )
+
+            recorder.startRecording()
+            buffer = FloatArray(BUFFER_SIZE_RECORDING)
+
+            launch {
+                while (true) {
+
+                    val read = recorder.read(
+                        buffer,
+                        0,
+                        BUFFER_SIZE_RECORDING,
+                        AudioRecord.READ_BLOCKING
+                    )
+
+                    if (read > 0) {
+                        send(buffer.copyOf())
+                    }
+                }
             }
         }
     }
