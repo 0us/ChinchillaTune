@@ -1,4 +1,4 @@
-# ChinchillaTuner
+# ChinchillaTune
 <br />
 <br />
 <br />
