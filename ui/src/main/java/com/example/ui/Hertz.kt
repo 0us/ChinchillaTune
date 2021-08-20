@@ -19,10 +19,9 @@ import kotlin.math.log
 fun RowScope.HzDisplay(hz: Double) {
     val hertz by animateFloatAsState(targetValue = hz.toFloat())
     BoxWithConstraints(contentAlignment = Alignment.Center) {
-
         Text(
             fontSize = 4.em,
-            text = "${hertz.toInt()} hz",
+            text = "${hertz.toDouble().round(1)} hz",
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .wrapContentSize()
@@ -47,6 +46,6 @@ fun BigNote(state: TunerState) {
             pitchOffset.absoluteValue < 0.5
         }?.name ?: ""
 
-        Text(fontSize = 120.sp, text = note)
+        Text(fontSize = 90.sp, text = note)
     }
 }

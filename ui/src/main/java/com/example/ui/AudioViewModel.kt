@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -24,6 +25,13 @@ class AudioViewModel @Inject constructor(
             if (pitch != -1.0) {
                 send(pitch)
             }
+        }
+    }
+
+    suspend fun record2(): ReceiveChannel<List<Double>> = viewModelScope.produce(Dispatchers.IO) {
+        for (floats in service.record(this)) {
+            val pitch = pitch.getAllPitches(floats)
+            send(pitch)
         }
     }
 }

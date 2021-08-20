@@ -1,5 +1,6 @@
 package com.example.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -16,8 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
-import kotlin.math.ln
-import kotlin.math.pow
+import kotlin.math.*
 
 @Composable
 fun Home(audioVm: AudioViewModel = viewModel()) {
@@ -41,10 +41,8 @@ fun Home(audioVm: AudioViewModel = viewModel()) {
                 Modifier
                     .fillMaxWidth()
                     .padding(vertical = 30.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Weighted {
-                    HzDisplay(state.currentHz)
                 }
                 Weighted {
                     TuningDropdown { state.notes = it }
@@ -55,15 +53,73 @@ fun Home(audioVm: AudioViewModel = viewModel()) {
             }
         }
         ChichillaBox(2f) {
-            BigNote(state)
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 45.dp)
+                    .fillMaxWidth(),
+
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 30.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Weighted {
+                        HzDisplay(state.currentHz)
+                    }
+                    Weighted {
+                        BigNote(state)
+                    }
+                    Weighted {}
+                }
+                HzNoteSlider(state = state)
+                Politiradar()
+            }
         }
         ChichillaBox(1f) {
             Column(modifier = Modifier.padding(horizontal = 45.dp)) {
                 key(state.notes) {
-                    Notes(state)
+                    EvenSpacedNotes(state)
                 }
-                HzSlider(state, 45.dp)
             }
+        }
+    }
+}
+
+@Composable
+fun PolitiradarText(state: TunerState) {
+    // todo single source of truth for currentNote
+    val note = state.notes.notes.firstOrNull() {
+        val pitchOffset = 12 * log(state.currentHz / it.hertz, 2.0)
+        pitchOffset.absoluteValue < 0.5
+    }
+    note?.let {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(text = "")
+            Text(text = note.hertz.toString())
+            Text(text = "")
+        }
+    }
+}
+
+@Composable
+fun Politiradar() {
+    val numberOfLines = 29
+    Row(
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom
+    ) {
+        repeat(numberOfLines) {
+            val height = if (it == 0 || it == 15 || it == 28) 88.dp else 80.dp
+            println(it)
+            Spacer(
+                modifier = Modifier
+                    .size(2.dp, height)
+                    .background(color = MaterialTheme.colors.secondaryVariant)
+            )
         }
     }
 }
@@ -149,4 +205,12 @@ class TunerState {
 
 fun Double.plusHalfSteps(halfSteps: Int): Double {
     return this * 2.0.pow(halfSteps / 12.0)
+}
+
+fun hzToPercent(hz: Double, min: Double, max: Double) = (ln(hz / min)) / (ln(max / min))
+
+fun Double.round(decimals: Int): Double {
+    var multiplier = 1.0
+    repeat(decimals) { multiplier *= 10 }
+    return round(this * multiplier) / multiplier
 }
