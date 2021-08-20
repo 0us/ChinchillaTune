@@ -13,7 +13,7 @@ import javax.inject.Inject
 const val AUDIO_SOURCE =
     MediaRecorder.AudioSource.MIC // for raw audio, use MediaRecorder.AudioSource.UNPROCESSED, see note in MediaRecorder section
 
-const val SAMPLE_RATE = 44100
+const val SAMPLE_RATE = 22050
 const val CHANNEL_CONFIG: Int = AudioFormat.CHANNEL_IN_MONO
 const val AUDIO_FORMAT: Int = AudioFormat.ENCODING_PCM_FLOAT
 
@@ -23,7 +23,7 @@ const val AUDIO_FORMAT: Int = AudioFormat.ENCODING_PCM_FLOAT
  * size is determined by [AudioRecord.getMinBufferSize] and depends on the
  * recording settings.
  */
-private const val BUFFER_SIZE_FACTOR = 2
+private const val BUFFER_SIZE_FACTOR = 1
 val BUFFER_SIZE_RECORDING =
     AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT) * BUFFER_SIZE_FACTOR
 

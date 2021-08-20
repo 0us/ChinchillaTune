@@ -152,7 +152,7 @@ fun Mover(hz: Double, hzRange: ClosedFloatingPointRange<Double>, parentWidth: Dp
 
         Spacer(
             Modifier
-                .offset(x = -(size / 2) + animatedPos.value)
+                .offset(x = animatedPos.value)
                 .size(size)
                 .indication(
                     interactionSource = remember { MutableInteractionSource() },
