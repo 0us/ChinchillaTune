@@ -1,23 +1,40 @@
 package com.example.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.Slider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.base.audio.tuning.TuningConfig
+import com.example.base.audio.tuning.NoteConfig
 import com.example.base.audio.tuning.tunings
+import com.example.base.audio.util.plusHalfSteps
+import com.example.ui.viewmodel.AudioViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
-import kotlin.math.*
+import kotlin.math.abs
+import kotlin.math.ln
+import kotlin.math.pow
+
+@Composable
+fun Debuggerr(state: TunerState) {
+    Box(
+        Modifier
+            .background(Color.Black)
+            .fillMaxWidth()
+    ) {
+        var value by remember { mutableStateOf(0f) }
+        Slider(value, onValueChange = {
+            state.currentHz = state.fractionToHz(it.toDouble())
+            value = it
+        })
+    }
+}
 
 @Composable
 fun Home(audioVm: AudioViewModel = viewModel()) {
@@ -36,95 +53,47 @@ fun Home(audioVm: AudioViewModel = viewModel()) {
             }
         }
 
-        ChichillaBox(1f) {
+        ChichillaRow(
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 30.dp), weight = 1f
+        ) {
+            Weighted {}
+            Weighted { TuningDropdown { state.notes = it } }
+            Weighted { Box {} }
+        }
+
+        ChichillaColumn(Modifier.padding(horizontal = 45.dp), weight = 2f) {
             Row(
                 Modifier
                     .fillMaxWidth()
                     .padding(vertical = 30.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Weighted {
+                    HzDisplay(state.currentHz)
                 }
                 Weighted {
-                    TuningDropdown { state.notes = it }
+                    BigNote(state)
                 }
-                Weighted {
-                    Box {}
-                }
+                Weighted {}
+            }
+            HzNoteSlider(state = state)
+            Politiradar()
+            PolitiradarText(state = state)
+        }
+        ChichillaColumn(Modifier.padding(horizontal = 45.dp), 1f) {
+            key(state.notes) {
+                EvenSpacedNotes(state)
             }
         }
-        ChichillaBox(2f) {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 45.dp)
-                    .fillMaxWidth(),
-
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 30.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Weighted {
-                        HzDisplay(state.currentHz)
-                    }
-                    Weighted {
-                        BigNote(state)
-                    }
-                    Weighted {}
-                }
-                HzNoteSlider(state = state)
-                Politiradar()
-            }
-        }
-        ChichillaBox(1f) {
-            Column(modifier = Modifier.padding(horizontal = 45.dp)) {
-                key(state.notes) {
-                    EvenSpacedNotes(state)
-                }
-            }
-        }
+        Debuggerr(state = state)
     }
 }
 
-@Composable
-fun PolitiradarText(state: TunerState) {
-    // todo single source of truth for currentNote
-    val note = state.notes.notes.firstOrNull() {
-        val pitchOffset = 12 * log(state.currentHz / it.hertz, 2.0)
-        pitchOffset.absoluteValue < 0.5
-    }
-    note?.let {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "")
-            Text(text = note.hertz.toString())
-            Text(text = "")
-        }
-    }
-}
 
 @Composable
-fun Politiradar() {
-    val numberOfLines = 29
-    Row(
-        Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Bottom
-    ) {
-        repeat(numberOfLines) {
-            val height = if (it == 0 || it == 15 || it == 28) 88.dp else 80.dp
-            println(it)
-            Spacer(
-                modifier = Modifier
-                    .size(2.dp, height)
-                    .background(color = MaterialTheme.colors.secondaryVariant)
-            )
-        }
-    }
-}
 
-@Composable
 inline fun RowScope.Weighted(content: @Composable () -> Unit) {
     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
         content()
@@ -132,85 +101,60 @@ inline fun RowScope.Weighted(content: @Composable () -> Unit) {
 }
 
 @Composable
-inline fun ColumnScope.ChichillaBox(weight: Float, content: @Composable () -> Unit) {
-    Box(
+inline fun ColumnScope.ChichillaRow(
+    modifier: Modifier = Modifier,
+    weight: Float,
+    content: @Composable RowScope.() -> Unit
+) {
+    Row(
         Modifier
             .weight(weight)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .then(modifier),
     ) {
-        content()
+        this.content()
     }
 }
 
-
 @Composable
-inline fun TuningDropdown(
-    crossinline onSelected: (TuningConfig) -> Unit = {}
+inline fun ColumnScope.ChichillaColumn(
+    modifier: Modifier = Modifier,
+    weight: Float,
+    content: @Composable ColumnScope.() -> Unit
 ) {
-    var expanded: Boolean by remember { mutableStateOf(false) }
-    var text: String by remember {
-        mutableStateOf(tunings.first().name)
-    }
-
-    Box(Modifier.clickable { expanded = true }) {
-        Row {
-            Text(text = text)
-            Icon(imageVector = Icons.Default.ArrowDropDown, "")
-        }
-
-        Row {
-            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                tunings.forEach { tuning ->
-                    DropdownMenuItem(onClick = {
-                        expanded = false
-                        text = tuning.name
-                        onSelected(tuning)
-                    }) {
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = tuning.name
-                        )
-                    }
-                }
-            }
-        }
+    Column(
+        Modifier
+            .weight(weight)
+            .fillMaxWidth()
+            .then(modifier),
+    ) {
+        this.content()
     }
 }
 
 class TunerState {
 
+    // todo remember on app restart
     var notes by mutableStateOf(tunings.first())
 
-    //    var min = notes.notes.first().hertz.plusHalfSteps(-1)
-    var min = notes.notes.first().hertz
-        private set
+    fun nearestNote(): NoteConfig {
+        val fraction = hzToFraction(currentHz)
+        return notes.notes.minByOrNull {
+            abs(fraction - hzToFraction(it.hertz))
+        }!!
 
-    //    var max = notes.notes.last().hertz.plusHalfSteps(1)
-    var max = notes.notes.last().hertz
+    }
+
+    var min = notes.notes.first().hertz.plusHalfSteps(-0.5)
+        private set
+    var max = notes.notes.last().hertz.plusHalfSteps(0.5)
         private set
 
     var currentHz by mutableStateOf(0.0)
 
-    /**
-     * Add x amount of halfSteps to [this]
-     *
-     * @param this a double representing a frequency on a logarithmic scale
-     * @param halfSteps the amount of halfsteps to add
-     */
+    // todo calculate currentNote and fraction here
 
-    fun hzToPercent() = (ln(currentHz / min)) / (ln(max / min))
-    fun hzToPercent(hz: Double) = (ln(hz / min)) / (ln(max / min))
-    fun percentToHz(x: Double) = max.pow(x) * min.pow(-x + 1)
-}
-
-fun Double.plusHalfSteps(halfSteps: Int): Double {
-    return this * 2.0.pow(halfSteps / 12.0)
-}
-
-fun hzToPercent(hz: Double, min: Double, max: Double) = (ln(hz / min)) / (ln(max / min))
-
-fun Double.round(decimals: Int): Double {
-    var multiplier = 1.0
-    repeat(decimals) { multiplier *= 10 }
-    return round(this * multiplier) / multiplier
+    fun hzToFraction() = (ln(currentHz / min)) / (ln(max / min))
+    fun hzToFraction(hz: Double) = (ln(hz / min)) / (ln(max / min))
+    fun fractionToHz(x: Double) = max.pow(x) * min.pow(-x + 1)
 }

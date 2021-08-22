@@ -1,14 +1,13 @@
-package com.example.ui
+package com.example.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.base.audio.AudioService
-import com.example.base.audio.PitchService
+import com.example.base.audio.audio.AudioService
+import com.example.base.audio.audio.PitchService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -25,13 +24,6 @@ class AudioViewModel @Inject constructor(
             if (pitch != -1.0) {
                 send(pitch)
             }
-        }
-    }
-
-    suspend fun record2(): ReceiveChannel<List<Double>> = viewModelScope.produce(Dispatchers.IO) {
-        for (floats in service.record(this)) {
-            val pitch = pitch.getAllPitches(floats)
-            send(pitch)
         }
     }
 }

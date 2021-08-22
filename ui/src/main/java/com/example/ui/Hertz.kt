@@ -1,7 +1,9 @@
 package com.example.ui
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -12,11 +14,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.example.base.audio.util.round
 import kotlin.math.absoluteValue
 import kotlin.math.log
 
 @Composable
-fun RowScope.HzDisplay(hz: Double) {
+fun HzDisplay(hz: Double) {
     val hertz by animateFloatAsState(targetValue = hz.toFloat())
     BoxWithConstraints(contentAlignment = Alignment.Center) {
         Text(
@@ -31,11 +34,6 @@ fun RowScope.HzDisplay(hz: Double) {
                 )
         )
     }
-}
-
-@Composable
-fun Contain() {
-
 }
 
 @Composable

@@ -1,7 +1,7 @@
 package com.example.chinchillatuner.di
 
-import com.example.base.audio.AudioService
-import com.example.base.audio.DefaultAudioService
+import com.example.base.audio.audio.AudioService
+import com.example.base.audio.audio.DefaultAudioService
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

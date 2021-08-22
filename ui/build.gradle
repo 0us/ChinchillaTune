@@ -60,4 +60,7 @@ dependencies {
     // For local unit tests
     testImplementation 'com.google.dagger:hilt-android-testing:2.38.1'
     kaptTest 'com.google.dagger:hilt-compiler:2.38.1'
+
+    //log
+    implementation 'com.jakewharton.timber:timber:5.0.1'
 }
