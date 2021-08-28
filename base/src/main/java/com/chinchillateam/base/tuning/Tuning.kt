@@ -74,6 +74,6 @@ data class TuningConfig(
 }
 
 data class NoteConfig(
-     val name: String,
-     val hertz: Double
+    val name: String,
+    val hertz: Double
 )

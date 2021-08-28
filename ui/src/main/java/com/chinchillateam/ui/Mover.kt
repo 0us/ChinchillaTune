@@ -4,7 +4,12 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ripple.rememberRipple
@@ -18,14 +23,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.chinchillateam.base.util.hzToPercent
 import com.chinchillateam.base.util.plusHalfSteps
-import com.chinchillateam.ui.TunerState
 
 private val ThumbDefaultElevation = 1.dp
 private val ThumbPressedElevation = 6.dp
 private val ThumbRippleRadius = 24.dp
 
 @Composable
-inline fun HzFullSpectrumSlider(state: TunerState, padding: Dp) {
+fun HzFullSpectrumSlider(state: TunerState, padding: Dp) {
     BoxWithConstraints {
         val widthDp: Dp
         with(LocalDensity.current) {
@@ -40,7 +44,7 @@ inline fun HzFullSpectrumSlider(state: TunerState, padding: Dp) {
 }
 
 @Composable
-inline fun HzNoteSlider(state: TunerState) {
+fun HzNoteSlider(state: TunerState) {
     BoxWithConstraints {
         val widthDp: Dp
         with(LocalDensity.current) {

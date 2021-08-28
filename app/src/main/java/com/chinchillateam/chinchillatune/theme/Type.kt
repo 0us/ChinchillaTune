@@ -8,7 +8,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.chinchillatuner.R
 
-
 private val light = Font(R.font.raleway_light, FontWeight.W300)
 private val regular = Font(R.font.raleway_regular, FontWeight.W400)
 private val medium = Font(R.font.raleway_medium, FontWeight.W500)
@@ -16,30 +15,29 @@ private val semibold = Font(R.font.raleway_semibold, FontWeight.W600)
 
 private val fontFamile = FontFamily(fonts = listOf(light, regular, medium, semibold))
 
-
 // Set of Material typography styles to start with
 val Typography = Typography(
 
-        body1 = TextStyle(
-                fontFamily = fontFamile,
-                fontWeight = FontWeight.W500,
-                fontSize = 16.sp
-        ),
-        body2 = TextStyle(
-                fontFamily = fontFamile,
-                fontWeight = FontWeight.W600,
-                fontSize = 16.sp
-        )
-        /* Other default text styles to override
-    button = TextStyle(
-        fontFamily = FontFamily.Default,
+    body1 = TextStyle(
+        fontFamily = fontFamile,
         fontWeight = FontWeight.W500,
-        fontSize = 14.sp
+        fontSize = 16.sp
     ),
-    caption = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 12.sp
+    body2 = TextStyle(
+        fontFamily = fontFamile,
+        fontWeight = FontWeight.W600,
+        fontSize = 16.sp
     )
-    */
+    /* Other default text styles to override
+button = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontWeight = FontWeight.W500,
+    fontSize = 14.sp
+),
+caption = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontWeight = FontWeight.Normal,
+    fontSize = 12.sp
+)
+*/
 )

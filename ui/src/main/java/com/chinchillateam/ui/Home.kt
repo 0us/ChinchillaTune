@@ -2,9 +2,22 @@ package com.chinchillateam.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Slider
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -14,7 +27,6 @@ import com.chinchillateam.base.tuning.NoteConfig
 import com.chinchillateam.base.tuning.tunings
 import com.chinchillateam.base.util.plusHalfSteps
 import com.chinchillateam.ui.viewmodel.AudioViewModel
-import com.example.ui.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -59,7 +71,8 @@ fun Home(audioVm: AudioViewModel = viewModel()) {
         ChichillaRow(
             Modifier
                 .fillMaxWidth()
-                .padding(vertical = 30.dp), weight = 1f
+                .padding(vertical = 30.dp),
+            weight = 1f
         ) {
             Weighted {}
             Weighted { TuningDropdown { state.notes = it } }
@@ -93,7 +106,6 @@ fun Home(audioVm: AudioViewModel = viewModel()) {
 //        Debuggerr(state = state)
     }
 }
-
 
 @Composable
 
@@ -145,7 +157,6 @@ class TunerState {
         return notes.notes.minByOrNull {
             abs(fraction - hzToFraction(it.hertz))
         }!!
-
     }
 
     var min = notes.notes.first().hertz.plusHalfSteps(-0.5)

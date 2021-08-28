@@ -17,6 +17,6 @@ class PitchService {
         return fanYin.pitch(buffer)
     }
 
-    private inline fun PitchDetector.pitch(buffer: FloatArray): Double =
+    private fun PitchDetector.pitch(buffer: FloatArray): Double =
         this.getPitch(buffer).pitch.toDouble()
 }
