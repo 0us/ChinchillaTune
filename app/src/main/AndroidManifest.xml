@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
-        android:name=".App"
+        android:name="com.chinchillateam.chinchillatune.App"
         android:allowBackup="true"
         android:icon="@mipmap/chinchilla"
         android:label="@string/app_name"
@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChinchillaTuner">
         <activity
-            android:name=".MainActivity"
+            android:name="com.chinchillateam.chinchillatune.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.ChinchillaTuner.NoActionBar">
